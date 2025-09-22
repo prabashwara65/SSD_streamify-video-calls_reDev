@@ -9,16 +9,17 @@ export async function signup(req, res) {
     if (!email || !password || !fullName) {
       return res.status(400).json({ message: "All fields are required" });
     }
+    
+    //password length validation change 6 to 8
+    // if (password.length < 8) {
+    //   return res.status(400).json({ message: "Password must be at least 8 characters" });
+    // }
 
-    if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
-    }
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
-    }
+    // if (!emailRegex.test(email)) {
+    //   return res.status(400).json({ message: "Invalid email format" });
+    // }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -57,7 +58,16 @@ export async function signup(req, res) {
       secure: process.env.NODE_ENV === "production",
     });
 
-    res.status(201).json({ success: true, user: newUser });
+    //only send safe user fields back (no password)
+    const safeUser = {
+      _id: newUser._id,
+      fullName: newUser.fullName,
+      email: newUser.email,
+      profilePic: newUser.profilePic,
+      isOnboarded: newUser.isOnboarded,
+    }
+
+    res.status(201).json({ success: true, user: safeUser });
   } catch (error) {
     console.log("Error in signup controller", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -89,7 +99,16 @@ export async function login(req, res) {
       secure: process.env.NODE_ENV === "production",
     });
 
-    res.status(200).json({ success: true, user });
+    //only send safe user fields back 
+    const safeUser = {
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+      isOnboarded: user.isOnboarded,
+    }
+
+    res.status(200).json({ success: true, user: safeUser });
   } catch (error) {
     console.log("Error in login controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
