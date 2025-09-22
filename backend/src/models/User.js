@@ -5,21 +5,34 @@ const userSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
-      required: true,
+      required: [true, "Full name is required"],
+      minlength: [3, "Full name must be at least 3 characters"],
+      maxlength: [50, "Full name must be at most 50 characters"],
+      trim: true,
     },
     email: {
       type: String,
-      required: true,
-      unique: true,
+      required: [true, "Email is required"],
+      unique: [true, "Email must be unique"],
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
     },
     password: {
       type: String,
-      required: true,
-      minlength: 6,
+      required: [true, "Password is required"],
+      minlength: [8, "Password must be at least 8 characters long"],
+      validate : {
+        validator: function(v) {
+           return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(v);
+      },
+      message: 
+      "Password must contain uppercase, lowercase, number and a special character",
     },
+  },
     bio: {
       type: String,
       default: "",
+      maxlength:200,
     },
     profilePic: {
       type: String,
