@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
+import {toast} from "react-hot-toast";
+
 
 import useSignUp from "../hooks/useSignUp";
+
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -27,6 +31,19 @@ const SignUpPage = () => {
 
   const handleSignup = (e) => {
     e.preventDefault();
+
+    const {email, password} = signupData;
+
+    //client side validation
+    if(!/\S+@\S+\.\S+/.test(email)) {
+      toast.error("Please provide a valid email address");
+      return;
+    }
+
+    if(!passwordPattern.test(password)) {
+      toast.error("Password must be at least 8 chars, include uppercase, lowercase, number & special character");
+      return;
+    }
     signupMutation(signupData);
   };
 

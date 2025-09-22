@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
 import useLogin from "../hooks/useLogin";
+import {toast} from "react-hot-toast";
 
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({
@@ -23,8 +24,23 @@ const LoginPage = () => {
   // This is how we did it using our custom hook - optimized version
   const { isPending, error, loginMutation } = useLogin();
 
+   const passwordPattern =/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
   const handleLogin = (e) => {
     e.preventDefault();
+
+    //email validation
+     if (!/\S+@\S+\.\S+/.test(loginData.email)) {
+      toast.error("Invalid email format");
+      return;
+    }
+
+    //Password validation
+    if (!passwordPattern.test(loginData.password)) {
+      toast.error("Use a stronger password (upper, lower, number, special)");
+      return;
+    }
+
     loginMutation(loginData);
   };
 
