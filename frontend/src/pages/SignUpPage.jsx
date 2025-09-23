@@ -2,8 +2,6 @@ import { useState } from "react";
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
 import {toast} from "react-hot-toast";
-
-
 import useSignUp from "../hooks/useSignUp";
 
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
@@ -123,7 +121,7 @@ const SignUpPage = () => {
                       required
                     />
                     <p className="text-xs opacity-70 mt-1">
-                      Password must be at least 6 characters long
+                      Password must be at least 8 characters long
                     </p>
                   </div>
 
@@ -149,6 +147,24 @@ const SignUpPage = () => {
                     "Create Account"
                   )}
                 </button>
+
+                 <hr />
+                  <div className="flex justify-center">
+                    <p className="text-sm opacity-70">or </p>
+                  </div>
+
+                  <div className="flex gap-4">
+                     <button 
+                       onClick={() => {
+                        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+                       }}
+
+                       className="btn btn-outline w-full flex items-center justify-center gap-2">
+                      <img src="/google.png" alt="Google Logo" className="w-5 h-5" />
+                      sign up with Google
+                       </button>
+                  </div>
+
 
                 <div className="text-center mt-4">
                   <p className="text-sm">

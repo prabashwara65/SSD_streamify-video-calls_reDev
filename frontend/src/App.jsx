@@ -7,6 +7,7 @@ import NotificationsPage from "./pages/NotificationsPage.jsx";
 import CallPage from "./pages/CallPage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
+import OAuthSuccess from "./pages/oAuthScuess.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -27,9 +28,11 @@ const App = () => {
   return (
     <div className="h-screen" data-theme={theme}>
       <Routes>
+        <Route path="/oauth-success" element={<OAuthSuccess />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/"
-          element={
+          path="/" element={
             isAuthenticated && isOnboarded ? (
               <Layout showSidebar={true}>
                 <HomePage />
@@ -39,7 +42,7 @@ const App = () => {
             )
           }
         />
-        <Route
+        {/* <Route
           path="/signup"
           element={
             !isAuthenticated ? <SignUpPage /> : <Navigate to={isOnboarded ? "/" : "/onboarding"} />
@@ -50,7 +53,7 @@ const App = () => {
           element={
             !isAuthenticated ? <LoginPage /> : <Navigate to={isOnboarded ? "/" : "/onboarding"} />
           }
-        />
+        /> */}
         <Route
           path="/notifications"
           element={
