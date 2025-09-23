@@ -3,10 +3,13 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import session from "express-session";
+import passport from "passport";
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import chatRoutes from "./routes/chat.route.js";
+import authGoogleRouter from "./routes/authGoogle.js";
 
 import { connectDB } from "./lib/db.js";
 
@@ -25,9 +28,25 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+//session middleware for passport
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "keyboard cat",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+//Initialize passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
+
+// Use the Google authentication routes
+app.use("/auth", authGoogleRouter);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

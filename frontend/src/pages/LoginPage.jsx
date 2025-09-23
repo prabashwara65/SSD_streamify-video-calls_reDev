@@ -2,6 +2,8 @@ import { useState } from "react";
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
 import useLogin from "../hooks/useLogin";
+import {toast} from "react-hot-toast";
+
 
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({
@@ -23,8 +25,23 @@ const LoginPage = () => {
   // This is how we did it using our custom hook - optimized version
   const { isPending, error, loginMutation } = useLogin();
 
+   const passwordPattern =/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
   const handleLogin = (e) => {
     e.preventDefault();
+
+    //email validation
+     if (!/\S+@\S+\.\S+/.test(loginData.email)) {
+      toast.error("Invalid email format");
+      return;
+    }
+
+    //Password validation
+    if (!passwordPattern.test(loginData.password)) {
+      toast.error("Use a stronger password (upper, lower, number, special)");
+      return;
+    }
+
     loginMutation(loginData);
   };
 
@@ -100,6 +117,23 @@ const LoginPage = () => {
                       "Sign In"
                     )}
                   </button>
+
+                  <hr />
+                  <div className="flex justify-center">
+                    <p className="text-sm opacity-70">or </p>
+                  </div>
+
+                  <div className="flex gap-4">
+                     <button 
+                       onClick={() => {
+                        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+                       }}
+
+                       className="btn btn-outline w-full flex items-center justify-center gap-2">
+                      <img src="/google.png" alt="Google Logo" className="w-5 h-5" />
+                      sign in with Google
+                       </button>
+                  </div>
 
                   <div className="text-center mt-4">
                     <p className="text-sm">
