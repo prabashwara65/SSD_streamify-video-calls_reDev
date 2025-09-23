@@ -20,9 +20,10 @@ export const getAuthUser = async () => {
     const res = await axiosInstance.get("/auth/me");
     return res.data;
   } catch (error) {
-    console.log("Error in getAuthUser:", error);
+    console.log("Error in getAuthUserrrrrrrrr:", error)
     return null;
   }
+  
 };
 
 export const completeOnboarding = async (userData) => {
