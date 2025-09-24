@@ -25,7 +25,8 @@
     "mongoose": "^8.13.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "stream-chat": "^8.60.0"
+    "stream-chat": "^8.60.0",
+    "validator": "^13.15.15"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
