@@ -5,21 +5,39 @@ const userSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
-      required: true,
+      required: [true, "Full name is required"],
+      minlength: [3, "Full name must be at least 3 characters"],
+      maxlength: [50, "Full name must be at most 50 characters"],
+      trim: true,
     },
     email: {
       type: String,
-      required: true,
-      unique: true,
+      required: [true, "Email is required"],
+      unique: [true, "Email must be unique"],
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
     },
     password: {
       type: String,
-      required: true,
-      minlength: 6,
+      minlength: [8, "Password must be at least 8 characters long"],
+      validate : {
+        validator: function(v) {
+          if(!v) return true; // allow empty password for the google users
+           return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(v);
+      },
+      message: 
+      "Password must contain uppercase, lowercase, number and a special character",
     },
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true, // allow null but unique when provided
+  },
     bio: {
       type: String,
       default: "",
+      maxlength:200,
     },
     profilePic: {
       type: String,
@@ -52,7 +70,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password") || !this.password) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);
@@ -64,6 +82,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!enteredPassword) return false;
   const isPasswordCorrect = await bcrypt.compare(enteredPassword, this.password);
   return isPasswordCorrect;
 };
