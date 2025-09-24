@@ -5,6 +5,7 @@ import cors from "cors";
 import path from "path";
 import session from "express-session";
 import passport from "passport";
+import csrf from "csurf"; 
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -28,19 +29,37 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-//session middleware for passport
+// Session middleware for passport
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "keyboard cat",
     resave: false,
     saveUninitialized: true,
+    cookie: { secure: false }, // ✅ set secure:true in prod with HTTPS
   })
 );
 
-//Initialize passport middleware
+// Initialize passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
+
+
+// CSRF protection middleware
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
+
+
+
+
+// Route for frontend to fetch CSRF token
+app.get("/api/csrf-token", (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
+
+
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
