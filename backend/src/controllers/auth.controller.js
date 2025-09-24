@@ -73,10 +73,41 @@ export async function login(req, res) {
     }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: "Invalid email or password" });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Check if account is locked
+    if (user.isLocked()) {
+      const lockoutTime = Math.ceil((user.lockoutUntil - Date.now()) / (1000 * 60)); // minutes
+      return res.status(423).json({ 
+        message: `Account is temporarily locked due to too many failed login attempts. Please try again in ${lockoutTime} minutes.`,
+        lockoutTime: lockoutTime
+      });
+    }
 
     const isPasswordCorrect = await user.matchPassword(password);
-    if (!isPasswordCorrect) return res.status(401).json({ message: "Invalid email or password" });
+    if (!isPasswordCorrect) {
+      // Increment failed login attempts
+      await user.incLoginAttempts();
+      
+      // Check if account should be locked after this attempt
+      const updatedUser = await User.findById(user._id);
+      if (updatedUser.isLocked()) {
+        return res.status(423).json({ 
+          message: "Account has been locked due to too many failed login attempts. Please try again in 2 hours.",
+          lockoutTime: 120 // 2 hours in minutes
+        });
+      }
+      
+      return res.status(401).json({ 
+        message: "Invalid email or password",
+        remainingAttempts: 5 - (updatedUser.failedLoginAttempts || 0)
+      });
+    }
+
+    // Reset failed login attempts on successful login
+    await user.resetLoginAttempts();
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "7d",
