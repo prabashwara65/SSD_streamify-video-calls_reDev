@@ -35,7 +35,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "keyboard cat",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // ✅ set secure:true in prod with HTTPS
+    cookie: { secure: false }, // set secure:true in prod with HTTPS
   })
 );
 
