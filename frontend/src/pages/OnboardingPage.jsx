@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { completeOnboarding } from "../lib/api";
 import { LoaderIcon, MapPinIcon, ShipWheelIcon, ShuffleIcon } from "lucide-react";
 import { LANGUAGES } from "../constants";
+import DOMPurify from 'dompurify';
 
 const OnboardingPage = () => {
   const { authUser } = useAuthUser();
@@ -27,7 +28,9 @@ const OnboardingPage = () => {
     },
 
     onError: (error) => {
-      toast.error(error.response.data.message);
+      //sanitize server-provided message
+      const safeMessage = DOMPurify.sanitize(error.response?.data?.message || "");
+      toast.error(safeMessage);
     },
   });
 
@@ -45,6 +48,22 @@ const OnboardingPage = () => {
     toast.success("Random profile picture generated!");
   };
 
+  // Sanitize bio before rendering
+  const safeBio = DOMPurify.sanitize(formState.bio || "", {
+    ALLOWED_TAGS: ['b','i','em','strong','a','p','br','ul','ol','li'],
+    ALLOWED_ATTR: ['href','target','rel']
+  });
+
+  // Validate image URL
+  const isValidImageUrl = (url) => {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch (err) {
+      return false;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
       <div className="card bg-base-200 w-full max-w-3xl shadow-xl">
@@ -56,7 +75,8 @@ const OnboardingPage = () => {
             <div className="flex flex-col items-center justify-center space-y-4">
               {/* IMAGE PREVIEW */}
               <div className="size-32 rounded-full bg-base-300 overflow-hidden">
-                {formState.profilePic ? (
+
+                {formState.profilePic && isValidImageUrl(formState.profilePic) ? (
                   <img
                     src={formState.profilePic}
                     alt="Profile Preview"
@@ -98,6 +118,7 @@ const OnboardingPage = () => {
               <label className="label">
                 <span className="label-text">Bio</span>
               </label>
+
               <textarea
                 name="bio"
                 value={formState.bio}
@@ -105,6 +126,11 @@ const OnboardingPage = () => {
                 className="textarea textarea-bordered h-24"
                 placeholder="Tell others about yourself and your language learning goals"
               />
+
+            {/* Safe rendering of bio */}
+              <div className="profile-bio mt-2 p-2 border rounded bg-base-100">
+                <div dangerouslySetInnerHTML={{ __html: safeBio }} />
+              </div>
             </div>
 
             {/* LANGUAGES */}

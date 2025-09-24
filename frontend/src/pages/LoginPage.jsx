@@ -3,6 +3,7 @@ import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
 import useLogin from "../hooks/useLogin";
 import {toast} from "react-hot-toast";
+import DOMPurify from 'dompurify';
 
 
 const LoginPage = () => {
@@ -61,10 +62,9 @@ const LoginPage = () => {
             </span>
           </div>
 
-          {/* ERROR MESSAGE DISPLAY */}
           {error && (
             <div className="alert alert-error mb-4">
-              <span>{error.response.data.message}</span>
+              <span>{DOMPurify.sanitize(error.response?.data?.message || "Unknown error")}</span>
             </div>
           )}
 

@@ -10,6 +10,7 @@ import { Link } from "react-router";
 import { CheckCircleIcon, MapPinIcon, UserPlusIcon, UsersIcon } from "lucide-react";
 
 import { capitialize } from "../lib/utils";
+import DOMPurify from "dompurify";
 
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
@@ -41,12 +42,27 @@ const HomePage = () => {
   useEffect(() => {
     const outgoingIds = new Set();
     if (outgoingFriendReqs && outgoingFriendReqs.length > 0) {
-      outgoingFriendReqs.forEach((req) => {
-        outgoingIds.add(req.recipient._id);
-      });
+      outgoingFriendReqs.forEach((req) => outgoingIds.add(req.recipient._id));
       setOutgoingRequestsIds(outgoingIds);
     }
   }, [outgoingFriendReqs]);
+
+  // Validate image URLs to prevent XSS
+  function isValidImageUrl(url) {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
+
+  // Sanitize bio
+  const sanitizeBio = (bio) =>
+    DOMPurify.sanitize(bio || "", {
+      ALLOWED_TAGS: ["b", "i", "em", "strong", "p", "br", "ul", "ol", "li"],
+      ALLOWED_ATTR: [],
+    });
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -101,6 +117,14 @@ const HomePage = () => {
               {recommendedUsers.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
 
+                // Safe profile pic
+                const profilePicUrl = isValidImageUrl(user.profilePic)
+                  ? user.profilePic
+                  : "/default-avatar.png";
+
+                // Sanitized bio
+                const safeBio = sanitizeBio(user.bio);
+
                 return (
                   <div
                     key={user._id}
@@ -109,7 +133,7 @@ const HomePage = () => {
                     <div className="card-body p-5 space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="avatar size-16 rounded-full">
-                          <img src={user.profilePic} alt={user.fullName} />
+                          <img src={profilePicUrl} alt={user.fullName} />
                         </div>
 
                         <div>
@@ -135,7 +159,7 @@ const HomePage = () => {
                         </span>
                       </div>
 
-                      {user.bio && <p className="text-sm opacity-70">{user.bio}</p>}
+                      {user.bio && <p className="text-sm opacity-70">{safeBio}</p>}
 
                       {/* Action button */}
                       <button
