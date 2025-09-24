@@ -76,6 +76,7 @@ const OnboardingPage = () => {
               {/* IMAGE PREVIEW */}
               <div className="size-32 rounded-full bg-base-300 overflow-hidden">
 
+                {/* safe profile pic rendering */}
                 {formState.profilePic && isValidImageUrl(formState.profilePic) ? (
                   <img
                     src={formState.profilePic}
